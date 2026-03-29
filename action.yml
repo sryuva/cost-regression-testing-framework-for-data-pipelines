@@ -1,0 +1,25 @@
+name: "AutoReview Cost Checker"
+description: "Detect cost regressions in data pipelines"
+
+inputs:
+  pr_file:
+    description: "Path to PR file"
+    required: true
+  main_file:
+    description: "Path to baseline file"
+    required: true
+  openai_api_key:
+    description: "API Key for optimizations"
+    required: true
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  env:
+    OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+  args:
+    - "--pr-file"
+    - ${{ inputs.pr_file }}
+    - "--main-file"
+    - ${{ inputs.main_file }}
+    - "--apply-patch"
