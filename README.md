@@ -1,32 +1,44 @@
 # AutoReview FinOps Bot 💰
 
-An automated CI/CD watcher that blocks PRs introducing compute cost regressions into Python data pipelines. It intercepts unoptimized code, benchmarks it dynamically via a sandboxed Docker container, and calculates real Serverless execution costs over scale scenarios (e.g., 10k runs/day). 
+An automated CI/CD watcher that blocks PRs introducing compute cost regressions into Python data pipelines. It intercepts unoptimized code, benchmarks it dynamically via a sandboxed Docker container, and calculates real Serverless execution costs over scale scenarios.
 
-If a cheaper equivalent exists natively, it blocks the PR and injects a `git apply` patch for engineers to grab immediately.
+## 🚀 Quick Start (Copy-Paste Install)
 
-## 🚀 Quick Start
-Integrate directly into any GitHub workflow natively catching PR modifications:
+Drop this into `.github/workflows/autoreview.yml`:
 
 ```yaml
-steps:
-  - name: Run AutoReview FinOps Pipeline
-    uses: yourusername/autoreview@v1
-    with:
-      pr_file: path/to/pr_pipeline.py
-      main_file: path/to/main_pipeline.py
-      openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+name: AutoReview Cost Checker
+on: [pull_request]
+
+jobs:
+  finops_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get baseline
+        run: |
+          git fetch origin main
+          git show origin/main:path/to/pipeline.py > baseline.py
+
+      - name: Run AutoReview
+        uses: your_username/autoreview@v1
+        with:
+          pr_file: path/to/pipeline.py
+          main_file: baseline.py
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
 ```
 
 ## Example Output
-When code fails the FinOps thresholds against the `main` branch, the bot outputs explicitly:
+
+❌ **Cost Regression Detected**
++28% compute increase
+~+$1,200/month
+
+**Top issue**:
+- `df.apply()` causing massive runtime execution slowdowns.
 
 ```text
-❌ Cost Regression Detected
-+28% increase (~+$1,200/month at scale).
-
-Top issue:
-- df.apply() causing massive runtime execution slowdowns.
-
 💰 Cost Impact (Serverless-equivalent GB-seconds)
 Estimated Monthly Savings if Optimized:
    1k runs/day:  $120
