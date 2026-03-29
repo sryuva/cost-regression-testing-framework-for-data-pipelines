@@ -1,10 +1,5 @@
-fastapi
-uvicorn
-pydantic
-litellm
-pytest
-python-dotenv
-json-repair
 pandas
-tabulate
-line-profiler
+numpy
+pyyaml
+line_profiler
+pydantic
