@@ -257,15 +257,16 @@ def _main_logic():
                     f.write(best["code"])
                 print(f"✅ Safe patch generated: {patch_file}")
                 
-            if args.fail_on_regression and user_cost_change_pct > args.min_impact:
-                # Calculate once more for safety
-                projected_monthly_main = target_b_cost * args.memory_price * runs_per_day * 30
-                if projected_monthly_main < 5.0:
-                    print("\\nℹ️ Regression exceeds threshold but total impact is low-impact (<$5/mo). Passing...\\n")
-                    sys.exit(0)
-                    
-                print("\\n🛑 Pipeline Blocked: Cost regression exceeds `--min-impact` threshold.")
-                sys.exit(1)
+    # Final BLOCK/PASS evaluation
+    if fail_on_regression and user_cost_change_pct > min_impact:
+        # Calculate once more for safety
+        projected_monthly_main = target_b_cost * args.memory_price * runs_per_day * 30
+        if projected_monthly_main < 5.0:
+            print("\\nℹ️ Regression exceeds threshold but total impact is low-impact (<$5/mo). Passing...\\n")
+            sys.exit(0)
+            
+        print("\\n🛑 Pipeline Blocked: Cost regression exceeds threshold.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
