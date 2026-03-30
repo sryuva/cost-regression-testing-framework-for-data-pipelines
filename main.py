@@ -109,14 +109,37 @@ def _main_logic():
     store = StateStore(db_path="memory.db")
     controller = IterationController(p_parser, generator, engine, evaluator, store)
 
-    results = controller.solve(
-        user_input=args.input,
-        baseline_code=baseline_code,
-        max_iterations=args.iterations,
-        constraints=constraints,
-        real_test_cases_path=args.test_cases,
-        guardrails=guardrails
-    )
+    has_ai = bool(os.getenv("OPENAI_API_KEY"))
+    results = {}
+    
+    if has_ai:
+        results = controller.solve(
+            user_input=args.input,
+            baseline_code=baseline_code,
+            max_iterations=args.iterations,
+            constraints=constraints,
+            real_test_cases_path=args.test_cases,
+            guardrails=guardrails
+        )
+    else:
+        print("\\nℹ️ No OPENAI_API_KEY found. AI optimization skipped.")
+        # Step: Manual benchmark for PR code if no AI
+        if baseline_code:
+            tcs = []
+            if args.test_cases and os.path.exists(args.test_cases):
+                with open(args.test_cases, "r") as f:
+                    tcs = json.load(f)
+            
+            if tcs:
+                res = engine.run_experiment(baseline_code, tcs)
+                results["baseline"] = {
+                    "compute_cost": res.runtime * (res.memory / 1024.0),
+                    "runtime": res.runtime,
+                    "memory": res.memory
+                }
+                print(f"  📂 Benchmark successful. PR cost: {results['baseline']['compute_cost']:.6f} GB-s")
+            else:
+                print("  ⚠️ Warning: No test cases provided (use --test-cases). Cannot benchmark PR.")
 
     # ---------------------------------------------------------
     # MAIN BRANCH BASELINE LOCKING

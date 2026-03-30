@@ -9,8 +9,8 @@ inputs:
     description: "Path to baseline file"
     required: true
   openai_api_key:
-    description: "API Key for optimizations"
-    required: true
+    description: "API Key for optimizations (Optional: enables AI suggestions)"
+    required: false
 
 runs:
   using: "docker"
