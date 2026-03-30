@@ -60,6 +60,7 @@ def _main_logic():
         sys.exit(0)
 
     args = parser.parse_args()
+    print(f"\\n🔍 Running AutoReview on: {args.pr_file} vs {args.main_file}")
 
     # 1. Load Configure System (.autoreview.yml)
     config = {}
