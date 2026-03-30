@@ -1,8 +1,20 @@
-# AutoReview FinOps Bot 💰
+# AutoReview
 
-An automated CI/CD watcher that blocks PRs introducing compute cost regressions into Python data pipelines. It benchmarks code dynamically via a sandboxed Docker container and calculates real Serverless execution costs over scale scenarios.
+Catch expensive code before it hits production.
+
+Every PR shows its cost impact — and flags regressions before they merge.
+
+“Like tests catch bugs, AutoReview catches expensive code.”
+
+An automated CI/CD watcher that blocks PRs introducing compute cost regressions into Python data pipelines. It benchmarks code dynamically via a sandboxed Docker container and calculates real Serverless execution costs.
+
+> [!TIP]
+> **No-AI Mode**: Works fully without AI. Uses deterministic benchmarking to compare PRs against the main branch. AI optimization suggestions are only triggered if an API key is provided.
 
 ## 🚀 Quick Start (Copy-Paste Install)
+
+Works out of the box with no API keys.
+AI suggestions are optional.
 
 Drop this into `.github/workflows/autoreview.yml`:
 
