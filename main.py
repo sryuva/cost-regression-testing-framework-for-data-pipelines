@@ -21,6 +21,13 @@ load_dotenv()
 
 
 def main():
+    try:
+        _main_logic()
+    except Exception as e:
+        print(f"\\n🛑 Internal Error: {str(e)}")
+        sys.exit(1)
+
+def _main_logic():
     parser = argparse.ArgumentParser(description="PR FinOps Bot (Data Pipeline Optimizer)")
     parser.add_argument("--input", "-i", type=str, default="Optimize pipeline", help="Context or problem description")
     parser.add_argument("--pr-file", type=str, required=True, help="Code string or path to .py file submitted in the PR")
@@ -49,7 +56,7 @@ def main():
         print("Adjust via `--runs-per-day`\\n")
         print("Top issue:")
         print("  - heavy Pandas usage in target pipelines")
-        print("\\n[Run with `-c` to begin deep optimization]")
+        print("\\n[Run with `--pr-file` to begin deep optimization]")
         sys.exit(0)
 
     args = parser.parse_args()
@@ -82,12 +89,12 @@ def main():
 
     # Load baseline code (The PR code)
     baseline_code = None
-    if args.code:
-        if os.path.exists(args.code):
-            with open(args.code, "r") as f:
+    if args.pr_file:
+        if os.path.exists(args.pr_file):
+            with open(args.pr_file, "r") as f:
                 baseline_code = f.read()
         else:
-            baseline_code = args.code
+            baseline_code = args.pr_file
 
     constraints = {}
     if args.max_latency: constraints["max_latency"] = args.max_latency
@@ -99,7 +106,7 @@ def main():
     generator = HypothesisGenerator(model=args.model)
     engine = ExecutionEngine(timeout=10.0, enable_profiling=not args.no_profile)
     evaluator = Evaluator() 
-    store = StateStore(db_path="data/memory.db")
+    store = StateStore(db_path="memory.db")
     controller = IterationController(p_parser, generator, engine, evaluator, store)
 
     results = controller.solve(
@@ -138,6 +145,12 @@ def main():
             target_b_mem = main_res.memory
             target_b_cost = main_res.runtime * (main_res.memory / 1024.0)
             main_baseline_used = True
+            
+            # Low Impact Warning (Visibility without blocking)
+            projected_monthly_main = target_b_cost * args.memory_price * runs_per_day * 30
+            if projected_monthly_main < 5.0:
+                print(f"\\nℹ️ Low impact area detected: Projected cost < $5/mo at current scale assumptions.")
+                print("Continuing analysis for visibility...\\n")
 
     # ---------------------------------------------------------
     # PR FORMAT OUTPUT
@@ -245,6 +258,12 @@ def main():
                 print(f"✅ Safe patch generated: {patch_file}")
                 
             if args.fail_on_regression and user_cost_change_pct > args.min_impact:
+                # Calculate once more for safety
+                projected_monthly_main = target_b_cost * args.memory_price * runs_per_day * 30
+                if projected_monthly_main < 5.0:
+                    print("\\nℹ️ Regression exceeds threshold but total impact is low-impact (<$5/mo). Passing...\\n")
+                    sys.exit(0)
+                    
                 print("\\n🛑 Pipeline Blocked: Cost regression exceeds `--min-impact` threshold.")
                 sys.exit(1)
 

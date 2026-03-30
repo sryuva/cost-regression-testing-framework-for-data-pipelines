@@ -1,6 +1,6 @@
 # AutoReview FinOps Bot 💰
 
-An automated CI/CD watcher that blocks PRs introducing compute cost regressions into Python data pipelines. It intercepts unoptimized code, benchmarks it dynamically via a sandboxed Docker container, and calculates real Serverless execution costs over scale scenarios.
+An automated CI/CD watcher that blocks PRs introducing compute cost regressions into Python data pipelines. It benchmarks code dynamically via a sandboxed Docker container and calculates real Serverless execution costs over scale scenarios.
 
 ## 🚀 Quick Start (Copy-Paste Install)
 
@@ -38,6 +38,10 @@ jobs:
 **Top issue**:
 - `df.apply()` causing massive runtime execution slowdowns.
 
+> [!NOTE]
+> Projections are estimates based on sampled execution and assumed workload frequency. 
+> Accurate results depend heavily on the quality and representativeness of provided test inputs.
+
 ```text
 💰 Cost Impact (Serverless-equivalent GB-seconds)
 Estimated Monthly Savings if Optimized:
@@ -59,6 +63,7 @@ Add an `.autoreview.yml` to your project root to tune thresholds:
 min_impact: 10          # Require >10% savings to block PR
 fail_on_regression: true
 runs_per_day: 10000     # Adjust assumed monthly execution volume
+track_history: true     # Record cost trends across PRs
 
 ignore:
   - legacy/*
