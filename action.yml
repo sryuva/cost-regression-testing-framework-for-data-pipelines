@@ -5,21 +5,24 @@ inputs:
   pr_file:
     description: "Path to PR file"
     required: true
+
   main_file:
     description: "Path to baseline file"
     required: true
+
   openai_api_key:
-    description: "API Key for optimizations (Optional: enables AI suggestions)"
+    description: "Optional: enables AI optimization suggestions"
     required: false
 
 runs:
   using: "docker"
   image: "Dockerfile"
+
   env:
     OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+
   args:
     - "--pr-file"
     - ${{ inputs.pr_file }}
     - "--main-file"
     - ${{ inputs.main_file }}
-    - "--apply-patch"
