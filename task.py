@@ -3,7 +3,13 @@ from perfcheck.profiler import track_time
 
 @track_time
 def transform(data):
-    return [x * 2 for x in data]
+    out = []
+    for x in data:
+        s = 0
+        for _ in range(3):
+            s += x
+        out.append(s)
+    return out
 
 
 def run_task(input_path: str, output_path: str):
