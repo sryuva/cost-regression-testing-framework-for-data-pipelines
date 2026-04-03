@@ -14,7 +14,7 @@ def pr_callable(data):
 
 
 def main():
-    input_data = list(range(2000000))
+    input_data = list(range(4000000))
     result = run_check(pr_callable, baseline_transform, input_data)
 
     text = result["summary"]
