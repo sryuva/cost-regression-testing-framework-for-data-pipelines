@@ -1,23 +1,21 @@
 from perfcheck.main import run_check
-from task import run_task as baseline
-from task import run_task as pr_version
+from perfcheck.profiler import track_time
+from task import transform as pr_transform
+
+
+@track_time
+def baseline_transform(data):
+    return [x * 2 for x in data]
+
+
+@track_time
+def pr_callable(data):
+    return pr_transform(data)
 
 
 def main():
-    # input/output paths are part of callable signature; task ignores input content in this testpack.
-    result = run_check(pr_version, baseline, ("in.txt", "out.txt"))
-
-    # Support callables expecting single input arg by adapting below wrappers.
-    # Here, task signature is two-arg, so we wrap them.
-
-if __name__ == "__main__":
-    def base_wrapper(_):
-        return baseline("input.txt", "baseline_out.txt")
-
-    def pr_wrapper(_):
-        return pr_version("input.txt", "pr_out.txt")
-
-    result = run_check(pr_wrapper, base_wrapper, 0)
+    input_data = list(range(300000))
+    result = run_check(pr_callable, baseline_transform, input_data)
 
     text = result["summary"]
     if result["flag"]:
@@ -31,3 +29,7 @@ if __name__ == "__main__":
         f.write(text + "\n")
 
     print(text)
+
+
+if __name__ == "__main__":
+    main()
