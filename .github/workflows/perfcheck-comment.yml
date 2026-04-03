@@ -1,0 +1,27 @@
+name: Perfcheck PR Comment
+
+on:
+  pull_request:
+
+jobs:
+  perfcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run perf check
+        run: python run_perfcheck.py > /dev/null
+
+      - name: Comment on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: result.txt
