@@ -3,6 +3,7 @@ from perfcheck.profiler import track_time
 
 @track_time
 def transform(data):
+    # no functional change in this branch
     return [x * 2 for x in data]
 
 
